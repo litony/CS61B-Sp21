@@ -1,7 +1,9 @@
 package game2048;
 
+import javax.annotation.processing.SupportedAnnotationTypes;
 import java.util.Formatter;
 import java.util.Observable;
+import java.util.concurrent.TimeoutException;
 
 
 /** The state of a game of 2048.
@@ -114,12 +116,21 @@ public class Model extends Observable {
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
 
+
+
+
+
+
         checkGameOver();
         if (changed) {
             setChanged();
         }
         return changed;
     }
+
+
+
+
 
     /** Checks if the game is over and sets the gameOver variable
      *  appropriately.
@@ -138,6 +149,13 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
+        for (int col = 0; col < b.size(); col++) {
+            for (int row = 0; row < b.size(); row++) {
+                if (b.tile(col, row) == null) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -148,6 +166,16 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
+        for (int col = 0; col < b.size(); col++) {
+            for (int row = 0; row < b.size(); row++ ) {
+                Tile t = b.tile(col, row);
+                if (t != null) {
+                    if (t.value() == MAX_PIECE) {
+                        return true;
+                    }
+                }
+            }
+        }
         return false;
     }
 
@@ -159,6 +187,38 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+
+        if (emptySpaceExists(b)) {
+            return true;
+        }
+        for (int col = 0; col < b.size(); col++) {
+            for (int row = 0; row < b.size(); row++) {
+                Tile currentTile = b.tile(col, row);
+                int upTile_row= row + 1, downTile_row = row - 1;
+                int leftTile_col = col - 1, rightTile_col = col + 1;
+                if (upTile_row < b.size()) {
+                    if (b.tile(col, upTile_row).value() == currentTile.value()) {
+                        return true;
+                    }
+                }
+                if (downTile_row >= 0) {
+                    if (b.tile(col, downTile_row).value() == currentTile.value()) {
+                        return true;
+                    }
+                }
+                if (leftTile_col >= 0) {
+                    if (b.tile(leftTile_col, row).value() == currentTile.value()) {
+                        return  true;
+                    }
+                }
+                if (rightTile_col < b.size()) {
+                    if (b.tile(rightTile_col, row).value() == currentTile.value()) {
+                        return true;
+                    }
+                }
+            }
+        }
+
         return false;
     }
 
@@ -200,4 +260,9 @@ public class Model extends Observable {
     public int hashCode() {
         return toString().hashCode();
     }
+
+
+
 }
+
+
