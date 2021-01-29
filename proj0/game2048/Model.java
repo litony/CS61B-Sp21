@@ -108,6 +108,7 @@ public class Model extends Observable {
      *    value, then the leading two tiles in the direction of motion merge,
      *    and the trailing tile does not.
      * */
+
     public boolean tilt(Side side) {
         boolean changed;
         changed = false;
@@ -115,17 +116,48 @@ public class Model extends Observable {
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
+        board.setViewingPerspective(side);
+        for (int col = 0; col < board.size(); col++) {
+            changed = dealRow(col, changed);
 
-
-
-
-
-
+        }
         checkGameOver();
         if (changed) {
             setChanged();
         }
+        board.setViewingPerspective(Side.NORTH);
         return changed;
+    }
+
+    private boolean dealRow(int col, boolean change) {
+           int topRow = board.size() - 1;
+           int currentRow = board.size() - 2;
+           boolean isMerge = false;
+           while (currentRow >= 0) {
+               Tile currentTile = board.tile(col, currentRow);
+               if (currentTile != null) {
+                   Tile topTile = board.tile(col, topRow);
+                   if (topTile != null) {
+                        if (topTile.value() == currentTile.value() && isMerge == false) {
+                            isMerge = board.move(col, topRow, currentTile);
+                            score += board.tile(col, topRow).value();
+                            topRow -= 1;
+                        } else if (topTile.value() == currentTile.value() && isMerge == true) {
+                            isMerge = board.move(col, topRow, currentTile);
+                        } else if (topTile.value() != currentTile.value()) {
+                            isMerge = board.move(col, topRow - 1, currentTile);
+                            topRow -= 1;
+                        }
+                   } else {
+                       isMerge = board.move(col, topRow, currentTile);
+                   }
+                   change = true;
+               }
+               currentRow -= 1;
+           }
+
+           return change;
+
     }
 
 
@@ -138,6 +170,7 @@ public class Model extends Observable {
     private void checkGameOver() {
         gameOver = checkGameOver(board);
     }
+
 
     /** Determine whether game is over. */
     private static boolean checkGameOver(Board b) {
@@ -260,9 +293,4 @@ public class Model extends Observable {
     public int hashCode() {
         return toString().hashCode();
     }
-
-
-
 }
-
-
