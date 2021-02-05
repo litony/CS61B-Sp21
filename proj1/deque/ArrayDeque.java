@@ -1,5 +1,5 @@
 package deque;
-/**
+
 public class ArrayDeque<Glorp> {
     private Glorp[] items;
     private int size;
@@ -13,9 +13,21 @@ public class ArrayDeque<Glorp> {
         size = 0;
     }
 
+    private int addOne(int i){
+        return (i + 1) % items.length;
+    }
+
+    private int subOne(int i) {
+        return (i - 1 + items.length) % items.length;
+    }
+
     private void resize(int cap) {
-        Glorp[] a = (Glorp []) new Object[cap];
-        System.arraycopy(items, 0, a, 0, size);
+        Glorp[] a = (Glorp[]) new Object[cap];
+        int first = subOne(nextFirst);
+        for (int i = size - 1; i >= 0; i--) {
+            a[i] = items[first];
+            first = subOne(first);
+        }
         items = a;
         nextFirst = size;
         nextLast = items.length - 1;
@@ -26,7 +38,7 @@ public class ArrayDeque<Glorp> {
             resize(size * 2);
         }
         items[nextFirst] = item;
-        nextFirst = (nextFirst + 1) % items.length;
+        nextFirst = addOne(nextFirst);
         size += 1;
     }
 
@@ -35,185 +47,97 @@ public class ArrayDeque<Glorp> {
             resize(size * 2);
         }
         items[nextLast] = item;
-        nextLast = (nextLast - 1 + items.length) % items.length;
+        nextLast = subOne(nextLast);
         size += 1;
     }
 
     public void printDeque() {
-
+        int first = subOne(nextFirst);
+        while (first != nextLast) {
+            System.out.print(items[first] + " ");
+            first = subOne(first);
+        }
+        System.out.println();
     }
 
-    public static void main(String[] args) {
-        ArrayDeque<Integer> L = new ArrayDeque<>();
-        L.addLast(1);
-        L.addLast(2);
-        L.addFirst(3);
-        L.addLast(4);
-        L.addFirst(5);
-        L.addLast(6);
-        L.addLast(7);
-        L.addFirst(8);
-        L.addLast(9);
-        L.addFirst(10);
-        L.addFirst(11);
-
-    }
- */
-
-public class ArrayDeque<T> {
-    private T[] items;
-    private int size;
-    private int nextFirst;
-    private int nextLast;
-    private final int INITIAL_CAPACITY = 8;
-
-    public ArrayDeque() {
-        items = (T[]) new Object[INITIAL_CAPACITY];
-        size = 0;
-        nextFirst = 0;
-        nextLast = 1;
+    public boolean isEmpty() {
+        return size == 0;
     }
 
     public int size() {
         return size;
     }
 
-    public boolean isEmpty() {
-        return (size == 0 ? true : false);
+    private boolean isRemove(){
+        return items.length >= 16 && size < (items.length / 4);
     }
 
-    public int minusOne(int index) {
-        return Math.floorMod(index-1, items.length);
-    }
-
-
-    public int plusOne(int index) {
-        return Math.floorMod(index+1, items.length);
-    }
-
-    public int plusOne(int index, int length) {
-        return Math.floorMod(index+1, length);
-    }
-
-    /**
-     *  invariants:
-     *      设计resize()方法，将在增加ArrayDeaue实例内存的方法中调用
-     *      内部判断内存满则调用expand()增加内存
-     *        如果内存过小则调用reduce()减小内存
-     **/
-
-    private void resize() {
-        if (size == items.length) {
-            expand();
+    public Glorp removeFirst() {
+        if (isRemove()) {
+            resize(items.length / 2);
         }
-        if (size < items.length / 4 && items.length > 8) {
-            reduce();
-        }
-    }
-
-    private void expand() {
-        resizeHelper(items.length * 2);
-    }
-
-    private void reduce() {
-        resizeHelper(items.length / 2);
-    }
-
-    private void resizeHelper(int capacity) {
-        T[] temp = items;
-        int begin = plusOne(nextFirst);
-        int end = minusOne(nextLast);
-        items = (T[]) new Object[capacity];
-        nextFirst = 0;
-        nextLast = 1;
-        for (int i=begin; i != end; i = plusOne(i, temp.length)) {
-            items[nextLast] = temp[i];
-            nextLast = plusOne(nextLast);
-        }
-        items[nextLast] = temp[end];
-        nextLast = plusOne(nextLast);
-    }
-
-    /**
-     *  invariants:
-     *      通过minusOne()方法确定nextFirst，(nextFirst-1)%items.length
-     *      即nextFirst的下一个位置
-     *      eg. (0 - 1) % 8 = 7
-     *
-     * */
-    public void addFirst(T item) {
-        // resize();
-        items[nextFirst] = item;
-        nextFirst = minusOne(nextFirst);
-        size++;
-    }
-
-    public T getFirst() {
-        return items[plusOne(nextFirst)];
-    }
-
-    public T removeFirst() {
-        resize();
-        T res = getFirst();
-        nextFirst = plusOne(nextFirst);
-        items[nextFirst] = null;
-        size--;
-        return res;
-    }
-
-    public void addLast(T item) {
-        resize();
-        items[nextLast] = item;
-        nextLast = plusOne(nextLast);
-        size++;
-    }
-
-    public T getLast() {
-        return items[minusOne(nextLast)];
-    }
-
-    public T removeLast() {
-        resize();
-        T res = getLast();
-        nextLast = minusOne(nextLast);
-        items[nextLast] = null;
-        size--;
-        return res;
-    }
-
-    public void printDeque() {
-        for (int index = plusOne(nextFirst); index != nextLast; index = plusOne(index)) {
-            System.out.print(items[index]);
-            System.out.print(" ");
-        }
-        System.out.println();
-    }
-
-    public T get(int index) {
-        if (index < 0 || index >= size) {
+        if (isEmpty()) {
             return null;
+        } else {
+            size -= 1;
         }
-        index = Math.floorMod(plusOne(nextFirst) + index, items.length);
-        return items[index];
+
+        nextFirst = subOne(nextFirst);
+        Glorp item = items[nextFirst];
+        items[nextFirst] = null;
+        return item;
     }
 
+    public Glorp removeLast(){
+        if (isRemove()) {
+            resize(items.length / 2);
+        }
+        if (isEmpty()) {
+            return null;
+        } else {
+            size -= 1;
+        }
+        nextLast = addOne(nextLast);
+        Glorp item = items[nextLast];
+        items[nextLast] = null;
+        return item;
+    }
 
-
+    public Glorp get(int index) {
+        int first = subOne(nextFirst);
+        while (index < size && index >= 0){
+            if (index == 0) {
+                return items[first];
+            }
+            index -= 1;
+            first = subOne(first);
+        }
+        return null;
+    }
 
     public static void main(String[] args) {
-        ArrayDeque<Integer> aq = new ArrayDeque<Integer>();
+        ArrayDeque<Integer> L = new ArrayDeque<>();
+
+
         for (int i = 0; i < 10; i++) {
-            aq.addLast(i);
+            L.addLast(i);
         }
 
-        aq.printDeque();
-        for (int i = 0; i < 10; i++) {
-            aq.addFirst(i);
+        for (int i = 0; i < 10; i++){
+            L.addFirst(i);
         }
-        aq.printDeque();
-        System.out.println(aq.get(0));
+        L.printDeque();
+
+        for (int i = 0; i < 15; i++) {
+            L.removeFirst();
+        }
+        L.printDeque();
+        System.out.println(L.get(4));
+
     }
+ }
 
-}
+
+
 
 
