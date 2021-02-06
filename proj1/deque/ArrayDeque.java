@@ -1,6 +1,8 @@
 package deque;
 
-public class ArrayDeque<Glorp> {
+import java.util.Iterator;
+
+public class ArrayDeque<Glorp> implements Iterable<Glorp>, Deque<Glorp> {
     private Glorp[] items;
     private int size;
     private int nextFirst;
@@ -60,10 +62,10 @@ public class ArrayDeque<Glorp> {
         System.out.println();
     }
 
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
+/**public boolean isEmpty() {
+ *      return size == 0;
+ *  }
+ */
     public int size() {
         return size;
     }
@@ -115,27 +117,70 @@ public class ArrayDeque<Glorp> {
         return null;
     }
 
-    public static void main(String[] args) {
-        ArrayDeque<Integer> L = new ArrayDeque<>();
+    public Iterator<Glorp> iterator() {
+        return new ArrayDequeIterator();
+    }
 
+    private class ArrayDequeIterator implements Iterator<Glorp> {
+        private int wizPos;
 
-        for (int i = 0; i < 10; i++) {
-            L.addLast(i);
+        public ArrayDequeIterator() {
+            wizPos = 0;
+
+        }
+        @Override
+        public boolean hasNext() {
+            return wizPos < size;
         }
 
-        for (int i = 0; i < 10; i++){
-            L.addFirst(i);
+        @Override
+        public Glorp next() {
+            Glorp returnItem = get(wizPos);
+            wizPos += 1;
+            return returnItem;
         }
-        L.printDeque();
 
-        for (int i = 0; i < 15; i++) {
-            L.removeFirst();
-        }
-        L.printDeque();
-        System.out.println(L.get(4));
 
     }
- }
+    @Override
+    public boolean equals(Object o){
+        if (o == null) {
+            return false;
+        }
+        if (this == o) {
+            return true;
+        }
+        if (this.getClass() != o.getClass()) {
+            return false;
+        }
+        ArrayDeque<Glorp> other = (ArrayDeque<Glorp>) o;
+        if (this.size() != other.size()) { return false; }
+        for (int i = 0; i < size; i++) {
+            if (this.get(i) != other.get(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static void main(String[] args) {
+        ArrayDeque<Integer> L = new ArrayDeque<>();
+       for (int i = 0; i < 10; i++) {
+           L.addFirst(1);
+       }
+
+        ArrayDeque<Integer> L1 = new ArrayDeque<>();
+        for (int i = 0; i < 10; i++) {
+            L1.addFirst(1);
+        }
+
+        System.out.println(L.equals(L1));
+
+
+        }
+
+}
+
 
 
 
